@@ -37,10 +37,14 @@ services:
       - db-data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test:
+        - CMD-SHELL
+        - >-
+          psql -h 127.0.0.1 -U ${POSTGRES_USER} -d ${POSTGRES_DB} -tAc
+          "SELECT to_regclass('public.your_table') IS NOT NULL" | grep -q t            
       interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 20
 
 volumes:
   db-data:
